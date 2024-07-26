@@ -1,0 +1,51 @@
+name: Deploy Docker Compose to EC2
+
+on:
+  push:
+    branches:
+      - main # Trigger deployment on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Upload Docker Compose file
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_KEY: ${{ secrets.EC2_KEY }}
+      run: |
+        # Ensure the SSH key is available
+        mkdir -p ~/.ssh
+        echo "$EC2_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+        # Upload the Docker Compose file to the EC2 instance
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa Github-Actions/unity/compose.yaml $EC2_USER@$EC2_HOST:/home/$EC2_USER/compose.yaml
+
+    - name: SSH and deploy
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_KEY: ${{ secrets.EC2_KEY }}
+      run: |
+        # Deploy using SSH
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'EOF'
+          # Check if Docker Compose is installed
+          if ! command -v docker-compose &> /dev/null
+          then
+              echo "Docker Compose not found, installing..."
+              sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K([^"]+)')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
+          # Navigate to the directory where the Docker Compose file was uploaded
+          cd /home/$EC2_USER
+
+          # Start or update the Docker Compose application
+          docker-compose -f compose.yaml up -d
+        EOF
