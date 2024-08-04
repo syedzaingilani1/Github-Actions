@@ -27,7 +27,7 @@ jobs:
         # Upload the Docker Compose file to the EC2 instance
         pwd
         ls -lhtra
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa Github-Actions/unity/compose.yaml $EC2_USER@$EC2_HOST:/home/$EC2_USER/compose.yaml
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa unity/compose.yaml $EC2_USER@$EC2_HOST:/home/$EC2_USER/compose.yaml
 
     - name: SSH and deploy
       env:
