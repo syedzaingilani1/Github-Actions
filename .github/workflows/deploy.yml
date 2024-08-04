@@ -48,6 +48,8 @@ jobs:
           fi
 
           # Navigate to the directory where the Docker Compose file was uploaded
+          echo " Testing the variable "
+          echo "==================== $EC2_USER ============= "
           cd /home/$EC2_USER
           pwd 
           hostname -I 
