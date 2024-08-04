@@ -35,14 +35,28 @@ jobs:
         EC2_USER: ${{ vars.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
       run: |  
-        # Deploy using SSH
         echo "Connecting to EC2 instance as user $EC2_USER at $EC2_HOST"
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'SH'
-          # Export environment variables for use in the script
-        export EC2_USER=$EC2_USER
-        echo "==================== \$EC2_USER ============= "
-        cd /home/\$EC2_USER
+    ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
+      # Export environment variables for use in the script
+      export EC2_USER='$EC2_USER'
+      
+      # Debugging output
+      echo '==================== \$EC2_USER ============= '
+      echo 'EC2_USER value is: \$EC2_USER'
+      
+      # Verify home directory path
+      echo 'Checking the home directory for \$EC2_USER:'
+      if [ ! -d \"/home/\$EC2_USER\" ]; then
+        echo 'Directory /home/\$EC2_USER does not exist.'
+        exit 1
+      fi
+      
+      # Navigate to the directory and execute commands
+      cd /home/\$EC2_USER
+      pwd
+      hostname -I
+      ls -lhtra
 
-          # Start or update the Docker Compose application
-          docker-compose -f compose.yaml up -d
-        SH
+      # Start or update the Docker Compose application
+      docker-compose -f compose.yaml up -d
+    "
