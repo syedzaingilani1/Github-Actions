@@ -46,7 +46,7 @@ jobs:
           fi
 
           # Navigate to the directory where the Docker Compose file was uploaded
-          cd /home/ubuntu
+          cd /home/$EC2_USER
           pwd 
           hostname -I 
           ls -lhtra 
