@@ -47,6 +47,9 @@ jobs:
 
           # Navigate to the directory where the Docker Compose file was uploaded
           cd /home/$EC2_USER
+          pwd 
+          hostname -I 
+          ls -lhtra 
 
           # Start or update the Docker Compose application
           docker-compose -f compose.yaml up -d
