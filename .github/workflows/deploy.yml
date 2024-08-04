@@ -38,12 +38,11 @@ jobs:
         # Deploy using SSH
         echo "Connecting to EC2 instance as user $EC2_USER at $EC2_HOST"
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'SH'
-          echo "==================== $EC2_USER ============= "
-          cd /home/$EC2_USER
-          pwd
-          hostname -I
-          ls -lhtra
+          # Export environment variables for use in the script
+        export EC2_USER=$EC2_USER
+        echo "==================== \$EC2_USER ============= "
+        cd /home/\$EC2_USER
 
           # Start or update the Docker Compose application
-          ocker-compose -f compose.yaml up -d
+          docker-compose -f compose.yaml up -d
         SH
