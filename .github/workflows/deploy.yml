@@ -35,26 +35,15 @@ jobs:
         EC2_USER: ${{ vars.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
       run: |  
-        echo $EC2_HOST
-        echo $EC2_USER
         # Deploy using SSH
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'EOF'
-          # Check if Docker Compose is installed
-          if ! command -v docker-compose &> /dev/null
-          then
-              echo "Docker Compose not found, installing..."
-              sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K([^"]+)')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              sudo chmod +x /usr/local/bin/docker-compose
-          fi
-
-          # Navigate to the directory where the Docker Compose file was uploaded
-          echo " Testing the variable "
+        echo "Connecting to EC2 instance as user $EC2_USER at $EC2_HOST"
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'SH'
           echo "==================== $EC2_USER ============= "
           cd /home/$EC2_USER
-          pwd 
-          hostname -I 
-          ls -lhtra 
+          pwd
+          hostname -I
+          ls -lhtra
 
           # Start or update the Docker Compose application
-          docker-compose -f compose.yaml up -d
-        EOF
+          ocker-compose -f compose.yaml up -d
+        SH
